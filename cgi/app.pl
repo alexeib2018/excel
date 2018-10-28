@@ -110,7 +110,7 @@ sub get_account {
 sub get_location_id {
 	my $id = shift;
 	my $account = shift;
-	my $query = "SELECT id FROM locations WHERE id='$id' AND account='$account'";
+	my $query = "SELECT id FROM excel_locations WHERE id='$id' AND account='$account'";
 
 	my $dbh = DBI->connect("dbi:Pg:dbname=$dbname;host=$dbhost;port=$dbport;options=$dboptions;tty=$dbtty","$username","$password",
 	        {PrintError => 0});
@@ -354,13 +354,13 @@ sub create_location {
 	my $location = shift;
 
 	my %log = ('account'=>$account,
-	           'table_changed'=>'locations');	
+	           'table_changed'=>'excel_locations');	
 
 	my $dbh = DBI->connect("dbi:Pg:dbname=$dbname;host=$dbhost;port=$dbport;options=$dboptions;tty=$dbtty","$username","$password",
 	        {PrintError => 0});
 
 	my $query = "SELECT id 
-	               FROM locations
+	               FROM excel_locations
 	              WHERE account='$account' AND
 	                    location='$location'";
 
@@ -379,7 +379,7 @@ sub create_location {
 	$sth->finish();
 
 	if ($location_id==0) {
-		$query = "INSERT INTO locations (location, account)
+		$query = "INSERT INTO excel_locations (location, account)
 		               VALUES ('$location','$account')";
 
 		$log{'action'} = 'insert';
@@ -404,13 +404,13 @@ sub edit_location {
 	my $location = shift;
 
 	my %log = ('account'=>$account,
-	           'table_changed'=>'locations');	
+	           'table_changed'=>'excel_locations');	
 
 	my $dbh = DBI->connect("dbi:Pg:dbname=$dbname;host=$dbhost;port=$dbport;options=$dboptions;tty=$dbtty","$username","$password",
 	        {PrintError => 0});
 
 	my $query = "SELECT location
-	               FROM locations
+	               FROM excel_locations
 	              WHERE account='$account' AND
 	                    id='$location_id'";
 
@@ -428,7 +428,7 @@ sub edit_location {
 	}
 	$sth->finish();
 
-	$query = "UPDATE locations
+	$query = "UPDATE excel_locations
 	             SET location='$location'
 	           WHERE account='$account' AND
 	                      id='$location_id'";
@@ -454,7 +454,7 @@ sub delete_location {
 	my $location_id = shift;
 
 	my %log = ('account'=>$account,
-	           'table_changed'=>'locations');	
+	           'table_changed'=>'excel_locations');	
 
 	my $dbh = DBI->connect("dbi:Pg:dbname=$dbname;host=$dbhost;port=$dbport;options=$dboptions;tty=$dbtty","$username","$password",
 	        {PrintError => 0});
@@ -477,7 +477,7 @@ sub delete_location {
 	$sth->finish();
 
 	$query = "SELECT location
-	            FROM locations
+	            FROM excel_locations
 	           WHERE account='$account' AND
 	                      id='$location_id'";
 
@@ -495,7 +495,7 @@ sub delete_location {
 	}
 	$sth->finish();
 
-	$query = "DELETE FROM locations
+	$query = "DELETE FROM excel_locations
 	           WHERE account='$account' AND
                      id='$location_id'";
 
@@ -656,7 +656,7 @@ sub import_excel_get_or_create_location_id {
 	my $location = shift;
 
 	my $query_select = "SELECT id
-	                      FROM locations
+	                      FROM excel_locations
 	                     WHERE account='$account' AND
 	                          location='$location'";
 
@@ -675,7 +675,7 @@ sub import_excel_get_or_create_location_id {
 	$sth->finish();
 
 	if ($location_id == 0) {
-		my $query_insert = "INSERT INTO locations (location, account)
+		my $query_insert = "INSERT INTO excel_locations (location, account)
    		                         VALUES ('$location','$account')";
 		$rv = $dbh->do($query_insert);
 		if (!defined $rv) {
@@ -811,7 +811,7 @@ sub process_request {
 		                                                  JOIN prices ON items.item_no=prices.item_no
 		                                                           WHERE prices.account='$account'");
 		my $locations = select_json( ['id','location'], "SELECT id, location
-		                                                   FROM locations
+		                                                   FROM excel_locations
 		                                                  WHERE account='$account'");
 		my $orders = select_json( ['day','location','item','qte','active'],
 								  "SELECT day_of_week,location,item_no,quantity,active
