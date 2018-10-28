@@ -280,7 +280,7 @@
 
     <form action="javascript:void(0)" id="import_excel_form">
       <div class="col-2 m-1">
-        <input type="file" id="import_excel_file">
+        <input type="file" id="import_excel_file" accept=".xls, .xlsx, .xlsm">
       </div>
       <div class="clearfix m-1"></div>
 
