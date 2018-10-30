@@ -460,6 +460,23 @@ sub delete_location {
 	        {PrintError => 0});
 
 	my $query = "SELECT id 
+	               FROM standing_orders
+	              WHERE account='$account' AND
+	                    location='$location_id'";
+
+	my $sth = $dbh->prepare($query);
+	my $rv = $sth->execute();
+	if (!defined $rv) {
+	  print "Error in request: " . $dbh->errstr . "\n";
+	  exit(0);
+	}
+
+	while (my @array = $sth->fetchrow_array()) {
+		return 0;
+	}
+	$sth->finish();
+
+	my $query = "SELECT id 
 	               FROM excel_orders
 	              WHERE account='$account' AND
 	                    location='$location_id'";
