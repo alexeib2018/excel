@@ -110,7 +110,7 @@ sub get_account {
 sub get_location_id {
 	my $id = shift;
 	my $account = shift;
-	my $query = "SELECT id FROM excel_locations WHERE id='$id' AND account='$account'";
+	my $query = "SELECT id FROM locations WHERE id='$id' AND account='$account'";
 
 	my $dbh = DBI->connect("dbi:Pg:dbname=$dbname;host=$dbhost;port=$dbport;options=$dboptions;tty=$dbtty","$username","$password",
 	        {PrintError => 0});
@@ -143,13 +143,13 @@ sub standing_order_create_or_update {
 	my $active = shift;
 
 	my %log = ('account'=>$account,
-	           'table_changed'=>'excel_standing_orders');
+	           'table_changed'=>'excel_orders');
 
 	my $dbh = DBI->connect("dbi:Pg:dbname=$dbname;host=$dbhost;port=$dbport;options=$dboptions;tty=$dbtty","$username","$password",
 	        {PrintError => 0});
 
 	my $query = "SELECT id, day_of_week, location, item_no, quantity
-	               FROM excel_standing_orders
+	               FROM excel_orders
 	              WHERE account='$account' AND
 	                    day_of_week='$day_of_week' AND
 	                    location='$location_id' AND
@@ -173,7 +173,7 @@ sub standing_order_create_or_update {
 
 	if ($order_id == 0) {
 		if ($qte > 0) {
-			$query = "INSERT INTO excel_standing_orders (account, day_of_week, location, item_no, quantity, active, item_active)
+			$query = "INSERT INTO excel_orders (account, day_of_week, location, item_no, quantity, active, item_active)
 			               VALUES ('$account','$day_of_week', '$location_id', '$item_id', '$qte', '$active', 'true')";
 			$log{'action'} = 'insert';
 			$log{'new_value'} = "day_of_week=$day_of_week, location=$location_id, item_no=$item_id, quantity=$qte";
@@ -182,14 +182,14 @@ sub standing_order_create_or_update {
 		}
 	} else {
 		if ($qte > 0) {
-			$query = "UPDATE excel_standing_orders
+			$query = "UPDATE excel_orders
 			             SET quantity='$qte', active='$active'
 			           WHERE id='$order_id'";
 			$log{'action'} = 'update';
 			$log{'new_value'} = "day_of_week=$day_of_week, location=$location_id, item_no=$item_id, quantity=$qte";
 			$log{'old_value'} = $old_value;
 		} elsif ($qte == 0) {
-			$query = "DELETE FROM excel_standing_orders
+			$query = "DELETE FROM excel_orders
 			           WHERE id='$order_id'";
 			$log{'action'} = 'delete';
 			$log{'old_value'} = $old_value;
@@ -218,7 +218,7 @@ sub standing_order_copy {
 	my $location_to = shift;
 
 	my $query = "SELECT item_no,quantity,active
-	               FROM excel_standing_orders
+	               FROM excel_orders
 	              WHERE account='$account' AND
 	                    day_of_week='$day_of_week_from' AND
 	                    location='$location_from'";
@@ -253,12 +253,12 @@ sub standing_order_delete_item {
 	my $location_id = shift;
 
 	my %log = ('account'=>$account,
-	           'table_changed'=>'excel_standing_orders');
+	           'table_changed'=>'excel_orders');
 
 	my $dbh = DBI->connect("dbi:Pg:dbname=$dbname;host=$dbhost;port=$dbport;options=$dboptions;tty=$dbtty","$username","$password",
 	        {PrintError => 0});
 
-	my $query = "DELETE FROM excel_standing_orders
+	my $query = "DELETE FROM excel_orders
 	                WHERE account='$account' AND
 	                      item_no='$item_id' AND
 	                      day_of_week='$day_of_week' AND
@@ -286,12 +286,12 @@ sub standing_order_activate {
 	my $active = shift;
 
 	my %log = ('account'=>$account,
-	           'table_changed'=>'excel_standing_orders');
+	           'table_changed'=>'excel_orders');
 
 	my $dbh = DBI->connect("dbi:Pg:dbname=$dbname;host=$dbhost;port=$dbport;options=$dboptions;tty=$dbtty","$username","$password",
 	        {PrintError => 0});
 
-	my $query = "UPDATE excel_standing_orders
+	my $query = "UPDATE excel_orders
 	                SET active='$active'
 	              WHERE account='$account' AND
 	                    day_of_week='$day_of_week' AND
@@ -324,12 +324,12 @@ sub standing_order_delete {
 	my $active = shift;
 
 	my %log = ('account'=>$account,
-	           'table_changed'=>'excel_standing_orders');
+	           'table_changed'=>'excel_orders');
 
 	my $dbh = DBI->connect("dbi:Pg:dbname=$dbname;host=$dbhost;port=$dbport;options=$dboptions;tty=$dbtty","$username","$password",
 	        {PrintError => 0});
 
-	my $query = "DELETE FROM excel_standing_orders
+	my $query = "DELETE FROM excel_orders
 	              WHERE account='$account' AND
 	                    day_of_week='$day_of_week' AND
 	                    location='$location_id'";
@@ -354,13 +354,13 @@ sub create_location {
 	my $location = shift;
 
 	my %log = ('account'=>$account,
-	           'table_changed'=>'excel_locations');	
+	           'table_changed'=>'locations');	
 
 	my $dbh = DBI->connect("dbi:Pg:dbname=$dbname;host=$dbhost;port=$dbport;options=$dboptions;tty=$dbtty","$username","$password",
 	        {PrintError => 0});
 
 	my $query = "SELECT id 
-	               FROM excel_locations
+	               FROM locations
 	              WHERE account='$account' AND
 	                    location='$location'";
 
@@ -379,7 +379,7 @@ sub create_location {
 	$sth->finish();
 
 	if ($location_id==0) {
-		$query = "INSERT INTO excel_locations (location, account)
+		$query = "INSERT INTO locations (location, account)
 		               VALUES ('$location','$account')";
 
 		$log{'action'} = 'insert';
@@ -404,13 +404,13 @@ sub edit_location {
 	my $location = shift;
 
 	my %log = ('account'=>$account,
-	           'table_changed'=>'excel_locations');	
+	           'table_changed'=>'locations');	
 
 	my $dbh = DBI->connect("dbi:Pg:dbname=$dbname;host=$dbhost;port=$dbport;options=$dboptions;tty=$dbtty","$username","$password",
 	        {PrintError => 0});
 
 	my $query = "SELECT location
-	               FROM excel_locations
+	               FROM locations
 	              WHERE account='$account' AND
 	                    id='$location_id'";
 
@@ -428,7 +428,7 @@ sub edit_location {
 	}
 	$sth->finish();
 
-	$query = "UPDATE excel_locations
+	$query = "UPDATE locations
 	             SET location='$location'
 	           WHERE account='$account' AND
 	                      id='$location_id'";
@@ -454,13 +454,13 @@ sub delete_location {
 	my $location_id = shift;
 
 	my %log = ('account'=>$account,
-	           'table_changed'=>'excel_locations');	
+	           'table_changed'=>'locations');	
 
 	my $dbh = DBI->connect("dbi:Pg:dbname=$dbname;host=$dbhost;port=$dbport;options=$dboptions;tty=$dbtty","$username","$password",
 	        {PrintError => 0});
 
 	my $query = "SELECT id 
-	               FROM excel_standing_orders
+	               FROM excel_orders
 	              WHERE account='$account' AND
 	                    location='$location_id'";
 
@@ -477,7 +477,7 @@ sub delete_location {
 	$sth->finish();
 
 	$query = "SELECT location
-	            FROM excel_locations
+	            FROM locations
 	           WHERE account='$account' AND
 	                      id='$location_id'";
 
@@ -495,7 +495,7 @@ sub delete_location {
 	}
 	$sth->finish();
 
-	$query = "DELETE FROM excel_locations
+	$query = "DELETE FROM locations
 	           WHERE account='$account' AND
                      id='$location_id'";
 
@@ -521,14 +521,14 @@ sub replace_items {
 	my $location_id = shift;
 
 	my %log = ('account'=>$account,
-	           'table_changed'=>'excel_standing_orders');
+	           'table_changed'=>'excel_orders');
 
 	my $dbh = DBI->connect("dbi:Pg:dbname=$dbname;host=$dbhost;port=$dbport;options=$dboptions;tty=$dbtty","$username","$password",
 	        {PrintError => 0});
 
 	my $query;
 	if ($location_id != '0') {
-		$query = "UPDATE excel_standing_orders
+		$query = "UPDATE excel_orders
 		             SET item_no='$item_to'
 		           WHERE account='$account' AND
 		                 item_no='$item_from' AND
@@ -537,7 +537,7 @@ sub replace_items {
 		$log{'new_value'} = "item_no=$item_to";
 		$log{'old_value'} = "WHERE item_no=$item_from AND location=$location_id";
 	} else {
-		$query = "UPDATE excel_standing_orders
+		$query = "UPDATE excel_orders
 		             SET item_no='$item_to'
 		           WHERE account='$account' AND
 		                 item_no='$item_from'";
@@ -590,7 +590,7 @@ sub import_excel_create_or_update {
 	my $log_status = '';
 
 	my $query_select = "SELECT id, day_of_week, location, item_no, quantity
-	                      FROM excel_standing_orders
+	                      FROM excel_orders
 	                     WHERE account='$account' AND
 	                           day_of_week='$day_of_week' AND
 	                           location='$location_id' AND
@@ -616,7 +616,7 @@ sub import_excel_create_or_update {
 	my $query;
 	if ($order_id == 0) {
 		if ($qte > 0) {
-			$query = "INSERT INTO excel_standing_orders (account, day_of_week, location, item_no, quantity, active, item_active)
+			$query = "INSERT INTO excel_orders (account, day_of_week, location, item_no, quantity, active, item_active)
 			               VALUES ('$account','$day_of_week', '$location_id', '$item_id', '$qte', '$active', 'true')";
 			$log_status = "new";
 		} else {
@@ -626,12 +626,12 @@ sub import_excel_create_or_update {
 		if ($qte == $old_qte) {
 			$log_status = "same";
 		} elsif ($qte > 0) {
-			$query = "UPDATE excel_standing_orders
+			$query = "UPDATE excel_orders
 			             SET quantity='$qte', active='$active'
 			           WHERE id='$order_id'";
 			$log_status = "update($old_qte)";
 		} elsif ($qte == 0) {
-			$query = "DELETE FROM excel_standing_orders
+			$query = "DELETE FROM excel_orders
 			           WHERE id='$order_id'";
 			$log_status = "delete($old_qte)";
 		} else {
@@ -656,7 +656,7 @@ sub import_excel_get_or_create_location_id {
 	my $location = shift;
 
 	my $query_select = "SELECT id
-	                      FROM excel_locations
+	                      FROM locations
 	                     WHERE account='$account' AND
 	                          location='$location'";
 
@@ -675,7 +675,7 @@ sub import_excel_get_or_create_location_id {
 	$sth->finish();
 
 	if ($location_id == 0) {
-		my $query_insert = "INSERT INTO excel_locations (location, account)
+		my $query_insert = "INSERT INTO locations (location, account)
    		                         VALUES ('$location','$account')";
 		$rv = $dbh->do($query_insert);
 		if (!defined $rv) {
@@ -811,11 +811,11 @@ sub process_request {
 		                                                  JOIN prices ON items.item_no=prices.item_no
 		                                                           WHERE prices.account='$account'");
 		my $locations = select_json( ['id','location'], "SELECT id, location
-		                                                   FROM excel_locations
+		                                                   FROM locations
 		                                                  WHERE account='$account'");
 		my $orders = select_json( ['day','location','item','qte','active'],
 								  "SELECT day_of_week,location,item_no,quantity,active
-								     FROM excel_standing_orders
+								     FROM excel_orders
 								    WHERE account='$account' AND
 								          item_active=true");
 
