@@ -803,6 +803,8 @@ sub import_excel {
 
 	$dbh->disconnect();
 
+	unlink $filename;
+
 	return @log;
 }
 
