@@ -96,6 +96,17 @@ print $sheet->cell(11,6)."\n";
 print $sheet->cell(12,6)."\n";
 
 
+my $excel_timestamp = ($sheet->cell(6,6) - 25569) * 60 * 60 * 24;
+print "excel_timestamp = $excel_timestamp\n";
+my $excel_datestring = gmtime($excel_timestamp);
+print "excel_datestring = $excel_datestring\n";
+my ($sec,$min,$hour,$day,$mon,$year,$wday,$yday,$isdst) = gmtime($excel_timestamp);
+$mon += 1;
+$year += 1900;
+print "date: $year/$mon/$day\n";
+
+exit(0);
+
 my $email = Email::Simple->create(
     header => [
         From    => 'freshgrillfoods.delivery@gmail.com',

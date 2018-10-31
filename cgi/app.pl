@@ -604,6 +604,12 @@ sub import_excel_create_or_update {
 		}		
 	}
 
+	my $excel_timestamp = ($date - 25569) * 60 * 60 * 24;
+	my ($sec,$min,$hour,$day,$mon,$year,$wday,$yday,$isdst) = gmtime($excel_timestamp);
+	$mon += 1;
+	$year += 1900;
+	my $shipment_date = "$year/$mon/$day";
+
 	my $log_status = '';
 
 	my $query_select = "SELECT id, day_of_week, location, item_no, quantity
@@ -633,8 +639,8 @@ sub import_excel_create_or_update {
 	my $query;
 	if ($order_id == 0) {
 		if ($qte > 0) {
-			$query = "INSERT INTO excel_orders (account, day_of_week, location, item_no, quantity, active, item_active)
-			               VALUES ('$account','$day_of_week', '$location_id', '$item_id', '$qte', '$active', 'true')";
+			$query = "INSERT INTO excel_orders (account, day_of_week, location, item_no, quantity, shipment_date, active, item_active)
+			               VALUES ('$account','$day_of_week', '$location_id', '$item_id', '$qte', '$shipment_date', '$active', 'true')";
 			$log_status = "new";
 		} else {
 			$log_status = "REJECT";
