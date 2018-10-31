@@ -6,6 +6,7 @@ CREATE TABLE public.excel_orders (
     location text NOT NULL,
     quantity integer NOT NULL,
     active boolean DEFAULT true,
+    shipment_date date,
     date_created timestamp DEFAULT now(),
     item_active boolean DEFAULT true,
     CONSTRAINT excel_orders_day_of_week_check CHECK ((day_of_week = ANY (ARRAY['sunday'::text, 'monday'::text, 'tuesday'::text, 'wednesday'::text, 'thursday'::text, 'friday'::text, 'saturday'::text]))),
