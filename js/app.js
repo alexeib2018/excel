@@ -257,7 +257,7 @@ var app = new Vue({
                         self.login_account = data.data.account
                         self.login_name = data.data.name[0].name.replace(/\b[a-z](?=(?:[a-z]|\W|$))/g, function($0) { return $0.toUpperCase();})
                         self.login = 1
-                        self.active = 1
+                        self.active = 5
                         self.index = ''
                         self.login_incorrect = false
                         self.get_data()
@@ -570,7 +570,7 @@ var app = new Vue({
           axios.post('/cgi/app.pl?action=/api/import_excel', params)
                .then(function(data) {
                   self.import_excel_log = data.data.log
-                  self.get_data()
+                  // self.get_data()
                })
         }
         reader.readAsDataURL(el.files[0])
