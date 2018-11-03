@@ -476,13 +476,13 @@ sub delete_location {
 	}
 	$sth->finish();
 
-	my $query = "SELECT id 
-	               FROM excel_orders
-	              WHERE account='$account' AND
-	                    location='$location_id'";
+	$query = "SELECT id 
+	            FROM excel_orders
+	           WHERE account='$account' AND
+	                 location='$location_id'";
 
-	my $sth = $dbh->prepare($query);
-	my $rv = $sth->execute();
+	$sth = $dbh->prepare($query);
+	$rv = $sth->execute();
 	if (!defined $rv) {
 	  print "Error in request: " . $dbh->errstr . "\n";
 	  exit(0);
@@ -590,7 +590,20 @@ sub import_excel_create_or_update {
 	my $days = int($epoc / (24*60*60));
 	my $hours = int( ($epoc - $days * 24*60*60) / (60*60) );
 
-	my @log = ($day_of_week, $item_id, $qte);
+	my $excel_timestamp = ($date - 25569) * 60 * 60 * 24;
+	my ($sec,$min,$hour,$day,$mon,$year,$wday,$yday,$isdst) = gmtime($excel_timestamp);
+
+	if ($day<10) {
+		$day = "0$day";
+	}
+	$mon += 1;
+	if ($mon<10) {
+		$mon = "0$mon";
+	}
+	$year += 1900;
+	my $shipment_date = "$year-$mon-$day";
+
+	my @log = ($shipment_date, $item_id, $qte);
 
 	if ($hours < 8) {
 		if ($date - 25569 < $days) {
@@ -604,18 +617,12 @@ sub import_excel_create_or_update {
 		}		
 	}
 
-	my $excel_timestamp = ($date - 25569) * 60 * 60 * 24;
-	my ($sec,$min,$hour,$day,$mon,$year,$wday,$yday,$isdst) = gmtime($excel_timestamp);
-	$mon += 1;
-	$year += 1900;
-	my $shipment_date = "$year/$mon/$day";
-
 	my $log_status = '';
 
-	my $query_select = "SELECT id, day_of_week, location, item_no, quantity
+	my $query_select = "SELECT id, shipment_date, location, item_no, quantity
 	                      FROM excel_orders
 	                     WHERE account='$account' AND
-	                           day_of_week='$day_of_week' AND
+	                           shipment_date='$shipment_date' AND
 	                           location='$location_id' AND
 	                           item_no='$item_id'";
 
@@ -639,8 +646,8 @@ sub import_excel_create_or_update {
 	my $query;
 	if ($order_id == 0) {
 		if ($qte > 0) {
-			$query = "INSERT INTO excel_orders (account, day_of_week, location, item_no, quantity, shipment_date, active, item_active)
-			               VALUES ('$account','$day_of_week', '$location_id', '$item_id', '$qte', '$shipment_date', '$active', 'true')";
+			$query = "INSERT INTO excel_orders (account, location, item_no, quantity, shipment_date, active, item_active)
+			               VALUES ('$account', '$location_id', '$item_id', '$qte', '$shipment_date', '$active', 'true')";
 			$log_status = "new";
 		} else {
 			$log_status = "REJECT";
@@ -753,7 +760,7 @@ sub import_excel {
 
 	my $location = $sheet->label;
 	my $location_id = import_excel_get_or_create_location_id($account, $dbh, $location);
-	push @log, [$location];
+	push @log, [$location,'','',''];
 
 	my $sunday_date    = $sheet->cell(6, 6);
 	my $monday_date    = $sheet->cell(7, 6);
@@ -838,13 +845,13 @@ sub process_request {
 		my $locations = select_json( ['id','location'], "SELECT id, location
 		                                                   FROM locations
 		                                                  WHERE account='$account'");
-		my $orders = select_json( ['day','location','item','qte','active'],
-								  "SELECT day_of_week,location,item_no,quantity,active
-								     FROM excel_orders
-								    WHERE account='$account' AND
-								          item_active=true");
+		# my $orders = select_json( ['day','location','item','qte','active'],
+		# 						  "SELECT day_of_week,location,item_no,quantity,active
+		# 						     FROM excel_orders
+		# 						    WHERE account='$account' AND
+		#						          item_active=true");
 
-		my $result = '{"account":"'.$account.'","items":'.$items.',"locations":'.$locations.',"orders":'.$orders.'}';
+		my $result = '{"account":"'.$account.'","items":'.$items.',"locations":'.$locations.'}';
 	    $self->render(text => $result, format => 'json');
 	} elsif ($action eq '/api/order_save') {
 		my $day = $self->param('day');
@@ -949,11 +956,11 @@ sub process_request {
 		my $records = '[';
 		for(my $i=0; $i<=$#ret; $i++) {
 			my $item_arr = $ret[$i];
-			my $day_of_week = $item_arr->[0];
-			my $item_id     = $item_arr->[1];
-			my $qte         = $item_arr->[2];
-			my $status      = $item_arr->[3];
-			my $item = '{"day_of_week":"'.$day_of_week.'","item_id":"'.$item_id.'","qte":"'.$qte.'","status":"'.$status.'"}';
+			my $shipment_date = $item_arr->[0];
+			my $item_id       = $item_arr->[1];
+			my $qte           = $item_arr->[2];
+			my $status        = $item_arr->[3];
+			my $item = '{"shipment_date":"'.$shipment_date.'","item_id":"'.$item_id.'","qte":"'.$qte.'","status":"'.$status.'"}';
 			if ($i == 0) {
 				$records .= $item
 			} else {
