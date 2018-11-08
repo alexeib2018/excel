@@ -605,16 +605,19 @@ sub import_excel_create_or_update {
 
 	my @log = ($shipment_date, $item_id, $qte);
 
-	if ($hours < 8) {
-		if ($date - 25569 < $days) {
-			push @log, "REJECT";
-			return @log;
+	my $disable_day_check = 0;
+	if ($disable_day_check) {
+		if ($hours < 8) {
+			if ($date - 25569 < $days) {
+				push @log, "REJECT";
+				return @log;
+			}
+		} else {
+			if ($date - 25569 < $days+1) {
+				push @log, "REJECT";
+				return @log;
+			}		
 		}
-	} else {
-		if ($date - 25569 < $days+1) {
-			push @log, "REJECT";
-			return @log;
-		}		
 	}
 
 	my $log_status = '';
