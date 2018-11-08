@@ -5,10 +5,32 @@ use Email::Simple::Creator;
 use Spreadsheet::ParseXLSX;
 use Spreadsheet::Read;
 
-my $book = Spreadsheet::Read->new ("LA DCs Order Guide.xlsx");
+#my $book = Spreadsheet::Read->new ("LA DCs Order Guide.xlsx");
+my $book = Spreadsheet::Read->new ("Canteen Updated Fresh Grill Order - GARDEN GROVE Laura  CHANGES 11 01 2018 .xlsx");
+
 my $sheet = $book->sheet(1);
+
+my $sheets = $book->sheets;
+print "Sheets: $sheets\n";
+
+my $sheet = $book->sheet(2);
+
 #my $cell  = $sheet->cell("D1");
-#print $sheet->label;
+
+my $label = $sheet->label;
+print "Label: $label\n";
+
+print "\n";
+for my $sheet_no (1...$sheets) {
+	my $sheet = $book->sheet($sheet_no);
+	my $label = $sheet->label;
+	print "Label: $label\n";
+}
+print "\n";
+
+my $location = $sheet->cell("D2");
+print "location: $location\n";
+
 #print $sheet->maxrow;
 
 #my @dates;
@@ -105,7 +127,7 @@ $mon += 1;
 $year += 1900;
 print "date: $year/$mon/$day\n";
 
-exit(0);
+# exit(0);
 
 my $email = Email::Simple->create(
     header => [
