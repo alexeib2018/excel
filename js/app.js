@@ -619,5 +619,6 @@ var app = new Vue({
     }
   },
   mounted: function() {
+    $('#body').show()
   }
 })
