@@ -732,31 +732,13 @@ sub import_excel_get_or_create_location_id {
 	return $location_id;
 }
 
-sub import_excel {
+sub import_excel_load_sheet {
+	my $log_ref = shift;
 	my $account = shift;
-	my $file_base64 = shift;
+	my $sheet = shift;
+	my $location_id = shift;
 
-	my($fh, $filename) = tempfile(DIR=>'../tmp/', SUFFIX=>'.xlsx');
-
-	#open (my $fh, '>', '../tmp/orders_new.xlsx');
-	binmode ($fh);
-	print {$fh} decode_base64($file_base64);
-	#print {$fh} $filename;
-	close $fh;
-
-	my $book = Spreadsheet::Read->new($filename);
-
-	my @log = ();
-
-	$dbh = DBI->connect("dbi:Pg:dbname=$dbname;host=$dbhost;port=$dbport;options=$dboptions;tty=$dbtty","$username","$password",
-	        {PrintError => 0});
-
-	my $sheets = $book->sheets;
-	my $sheet = $book->sheet(1);
-
-	my $location = $sheet->label;
-	my $location_id = import_excel_get_or_create_location_id($account, $location);
-	push @log, [$location,'','',''];
+	my @log = @{$log_ref};
 
 	my $sunday_date    = $sheet->cell(6, 6);
 	my $monday_date    = $sheet->cell(7, 6);
@@ -808,6 +790,39 @@ sub import_excel {
 				push @log, [import_excel_create_or_update($account, 'saturday',  $saturday_date,  $location_id, $item, $qte, 'true')];
 			}		
 		}
+	}
+
+	@log;
+}
+
+sub import_excel {
+	my $account = shift;
+	my $file_base64 = shift;
+
+	my($fh, $filename) = tempfile(DIR=>'../tmp/', SUFFIX=>'.xlsx');
+
+	#open (my $fh, '>', '../tmp/orders_new.xlsx');
+	binmode ($fh);
+	print {$fh} decode_base64($file_base64);
+	#print {$fh} $filename;
+	close $fh;
+
+	my $book = Spreadsheet::Read->new($filename);
+
+	my @log = ();
+
+	$dbh = DBI->connect("dbi:Pg:dbname=$dbname;host=$dbhost;port=$dbport;options=$dboptions;tty=$dbtty","$username","$password",
+	        {PrintError => 0});
+
+	my $sheets = $book->sheets;
+	for my $sheet_no (1...$sheets) {
+		my $sheet = $book->sheet($sheet_no);
+
+		my $location = $sheet->label;
+		my $location_id = import_excel_get_or_create_location_id($account, $location);
+		push @log, [$location,'','',''];
+
+		@log = import_excel_load_sheet(\@log, $account, $sheet, $location_id);
 	}
 
 	$dbh->disconnect();
