@@ -50,6 +50,7 @@ var app = new Vue({
       login_incorrect: false,
       active_new: 1,
       show_disclaimer: 1,
+      show_spinner: 0,
       edit_location_id: 0,
       edit_location: '',
       location_invalid: false,
@@ -558,6 +559,7 @@ var app = new Vue({
       if (el.files && el.files[0]) {
         var file_name = el.files[0].name;
         var reader = new FileReader();
+        self.show_spinner = 1
         reader.onload = function(e) {
           var index = e.target.result.indexOf('base64,')
           if (index<0) {
@@ -570,6 +572,7 @@ var app = new Vue({
           axios.post('/cgi/app.pl?action=/api/import_excel', params)
                .then(function(data) {
                   self.import_excel_log = data.data.log
+                  self.show_spinner = 0
                   // self.get_data()
                })
         }

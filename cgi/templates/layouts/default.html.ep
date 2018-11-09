@@ -76,6 +76,16 @@
       <div class="content">
         <%= content %>
       </div>
+
+      <div v-if="show_spinner"
+           style="position: fixed;
+                  top: 50%;
+                  left: 50%;
+                  margin-left: -120px;
+                  margin-top: -120px;
+                  z-index: 10000">
+        <img src="/img/spinner.gif" height="240px">
+      </div>
     </div>
 
     <!-- Optional JavaScript -->
