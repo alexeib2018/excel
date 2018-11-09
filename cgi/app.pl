@@ -818,7 +818,7 @@ sub import_excel {
 	for my $sheet_no (1...$sheets) {
 		my $sheet = $book->sheet($sheet_no);
 
-		my $location = $sheet->label;
+		my $location = $sheet->cell("D2");
 		my $location_id = import_excel_get_or_create_location_id($account, $location);
 		push @log, [$location,'','',''];
 
