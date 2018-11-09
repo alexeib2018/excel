@@ -19,6 +19,7 @@ our $password;
 my $dbport = "5432";
 my $dboptions = "-e";
 my $dbtty = "ansi";
+my $dbh;
 
 sub save_log {
 	my %log = @_;
@@ -576,7 +577,6 @@ sub replace_items {
 }
 
 sub import_excel_create_or_update {
-	my $dbh = shift;
 	my $account = shift;
 	my $day_of_week = shift;
 	my $date = shift;
@@ -685,7 +685,6 @@ sub import_excel_create_or_update {
 
 sub import_excel_get_or_create_location_id {
 	my $account = shift;
-	my $dbh = shift;
 	my $location = shift;
 
 	my $query_select = "SELECT id
@@ -745,24 +744,18 @@ sub import_excel {
 	#print {$fh} $filename;
 	close $fh;
 
-	#my $filename = '../tmp/orders.xlsx';
 	my $book = Spreadsheet::Read->new($filename);
-	my $sheet = $book->sheet(1);
-	#my $cell  = $sheet->cell("D1");
-	#print $sheet->label;
-	#print $sheet->maxrow;
-
-	#my @dates;
-
-	#print $sheet->cell(7,6);
 
 	my @log = ();
 
-	my $dbh = DBI->connect("dbi:Pg:dbname=$dbname;host=$dbhost;port=$dbport;options=$dboptions;tty=$dbtty","$username","$password",
+	$dbh = DBI->connect("dbi:Pg:dbname=$dbname;host=$dbhost;port=$dbport;options=$dboptions;tty=$dbtty","$username","$password",
 	        {PrintError => 0});
 
+	my $sheets = $book->sheets;
+	my $sheet = $book->sheet(1);
+
 	my $location = $sheet->label;
-	my $location_id = import_excel_get_or_create_location_id($account, $dbh, $location);
+	my $location_id = import_excel_get_or_create_location_id($account, $location);
 	push @log, [$location,'','',''];
 
 	my $sunday_date    = $sheet->cell(6, 6);
@@ -782,37 +775,37 @@ sub import_excel {
 
 			$qte = $sheet->cell(6, $row);
 			if ($qte =~ m/\s?\d+\s?/) {
-				push @log, [import_excel_create_or_update($dbh, $account, 'sunday',    $sunday_date,    $location_id, $item, $qte, 'true')];
+				push @log, [import_excel_create_or_update($account, 'sunday',    $sunday_date,    $location_id, $item, $qte, 'true')];
 			}
 
 			$qte = $sheet->cell(7, $row);
 			if ($qte =~ m/\s?\d+\s?/) {
-				push @log, [import_excel_create_or_update($dbh, $account, 'monday',    $monday_date,    $location_id, $item, $qte, 'true')];
+				push @log, [import_excel_create_or_update($account, 'monday',    $monday_date,    $location_id, $item, $qte, 'true')];
 			}
 
 			$qte = $sheet->cell(8, $row);
 			if ($qte =~ m/\s?\d+\s?/) {
-				push @log, [import_excel_create_or_update($dbh, $account, 'tuesday',   $tuesday_date,   $location_id, $item, $qte, 'true')];
+				push @log, [import_excel_create_or_update($account, 'tuesday',   $tuesday_date,   $location_id, $item, $qte, 'true')];
 			}
 
 			$qte = $sheet->cell(9, $row);
 			if ($qte =~ m/\s?\d+\s?/) {
-				push @log, [import_excel_create_or_update($dbh, $account, 'wednesday', $wednesday_date, $location_id, $item, $qte, 'true')];
+				push @log, [import_excel_create_or_update($account, 'wednesday', $wednesday_date, $location_id, $item, $qte, 'true')];
 			}
 
 			$qte = $sheet->cell(10, $row);
 			if ($qte =~ m/\s?\d+\s?/) {
-				push @log, [import_excel_create_or_update($dbh, $account, 'thursday',  $thursday_date,  $location_id, $item, $qte, 'true')];
+				push @log, [import_excel_create_or_update($account, 'thursday',  $thursday_date,  $location_id, $item, $qte, 'true')];
 			}
 
 			$qte = $sheet->cell(11, $row);
 			if ($qte =~ m/\s?\d+\s?/) {
-				push @log, [import_excel_create_or_update($dbh, $account, 'friday',    $friday_date,    $location_id, $item, $qte, 'true')];
+				push @log, [import_excel_create_or_update($account, 'friday',    $friday_date,    $location_id, $item, $qte, 'true')];
 			}
 
 			$qte = $sheet->cell(12, $row);
 			if ($qte =~ m/\s?\d+\s?/) {
-				push @log, [import_excel_create_or_update($dbh, $account, 'saturday',  $saturday_date,  $location_id, $item, $qte, 'true')];
+				push @log, [import_excel_create_or_update($account, 'saturday',  $saturday_date,  $location_id, $item, $qte, 'true')];
 			}		
 		}
 	}
