@@ -579,6 +579,9 @@ var app = new Vue({
         }
         reader.readAsDataURL(el.files[0])
       }
+    },
+    import_excel_sort: function(arr, sort_mode) {
+      return arr
     }
   },
   watch: {
@@ -608,6 +611,31 @@ var app = new Vue({
     },
     replace_from_item: function(val) {
       this.replace_search_results = []
+    },
+    sort_mode: function(sort_mode) {
+      var arr = []
+      var result = []
+      var location = {shipment_date: '', item_id: '', qte:'', status:''}
+      for (var i=0; i<this.import_excel_log.length; i++) {
+        var item = this.import_excel_log[i]
+        if (item.item_id==='') {
+          if (arr.length>0) { 
+            arr = this.import_excel_sort(arr, sort_mode)
+            result.push(location)
+            result = result.concat(arr)
+          }
+          arr = []
+          location = item
+        } else {
+          arr.push(item)
+        }
+      }
+      if (arr.length>0) { 
+        arr = this.import_excel_sort(arr, sort_mode)
+        result.push(location)
+        result = result.concat(arr)
+      }
+      this.import_excel_log = result
     }
   },
   filters: {
