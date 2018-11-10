@@ -294,12 +294,31 @@
   </div>
 
   <table  class="table table-striped table-sm" style="width:100%; margin-top:20px">
+    <thead v-if="import_excel_log.length>0">
+      <th v-if="sort_mode!=1"
+          style="padding-left:20px;">Date
+        (<span @click="sort_mode=1"
+               style="text-decoration:underline; cursor:pointer;">sort</span>)
+        </th>
+      <th v-else style="padding-left:20px;">Date</th>
+
+      <th v-if="sort_mode!=2"
+          style="width:90px">Item
+        (<span @click="sort_mode=2"
+               style="text-decoration:underline; cursor:pointer;">sort</span>)
+        </th>
+      <th v-else style="width:90px">Item</th>
+
+      <th style="padding-left:50px;">Description</th>
+      <th>Qantity</th>
+      <th>Status</th>
+    </thead>
     <tr v-for="item in import_excel_log">
       <td v-if="item.item_id" style="padding-left:20px">{{ item.shipment_date }}</td>
       <td v-if="!item.item_id" style="font-weight:bold; padding-top:20px">{{ item.shipment_date }}:</td>
       <td>{{ item.item_id }}</td>
       <td>{{ items[item.item_id] }}</td>
-      <td>{{ item.qte }}</td>
+      <td style="padding-left:20px;">{{ item.qte }}</td>
       <td>{{ item.status }}</td>
     </tr>
   </table>

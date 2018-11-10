@@ -61,7 +61,8 @@ var app = new Vue({
       replace_to_item: 0,
       replace_location: 0,
       replace_search_results: [],
-      import_excel_log: []
+      import_excel_log: [],
+      sort_mode: 0
     }
   },
   methods: {
