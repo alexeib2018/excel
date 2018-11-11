@@ -590,11 +590,14 @@ var app = new Vue({
         }
         return 0
       }
+      function compare_shipment_date(val1, val2) {
+        return compare_base(val1.shipment_date, val2.shipment_date)
+      }
       function compare_image_id(val1, val2) {
         return compare_base(val1.item_id, val2.item_id)
       }
       if (sort_mode==1) {   // Date column
-
+        return arr.sort(compare_shipment_date)
       } else if (sort_mode==2) {   // Item_id column
         return arr.sort(compare_image_id)
       }
