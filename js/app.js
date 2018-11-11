@@ -596,10 +596,24 @@ var app = new Vue({
       function compare_image_id(val1, val2) {
         return compare_base(val1.item_id, val2.item_id)
       }
-      if (sort_mode==1) {   // Date column
+      function compare_description(val1, val2) {
+        var description1 = self.items[val1.item_id]
+        var description2 = self.items[val2.item_id]
+        if(!description1) {
+          description1 = ''
+        }
+        if(!description2) {
+          description2 = ''
+        }
+        return compare_base(description1, description2)
+      }
+      var self=this
+      if (sort_mode==1) {           // Date column
         return arr.sort(compare_shipment_date)
-      } else if (sort_mode==2) {   // Item_id column
+      } else if (sort_mode==2) {    // Item_id column
         return arr.sort(compare_image_id)
+      } else if (sort_mode==3) {    // Description column
+        return arr.sort(compare_description)
       }
       return arr
     }

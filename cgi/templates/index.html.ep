@@ -309,7 +309,13 @@
         </th>
       <th v-else style="width:90px">Item</th>
 
-      <th style="padding-left:50px;">Description</th>
+      <th v-if="sort_mode!=3"
+          style="padding-left:50px;">Description
+        (<span @click="sort_mode=3"
+               style="text-decoration:underline; cursor:pointer;">sort</span>)
+        </th>
+      <th v-else style="padding-left:50px;">Description</th>
+
       <th>Qantity</th>
       <th>Status</th>
     </thead>
