@@ -576,6 +576,20 @@ sub replace_items {
 	return 1;	
 }
 
+sub import_excel_error {
+	my $message = shift;
+	my $query = shift;
+
+	if (!$query) {
+		$query = '';
+	}
+
+    print "Content-Type: text/plain\n\n";
+    print "Error in request: $message\n\n";
+    print "Query: $query\n";
+    exit(0);
+}
+
 sub import_excel_create_or_update {
 	my $account = shift;
 	my $day_of_week = shift;
@@ -632,8 +646,8 @@ sub import_excel_create_or_update {
 	my $sth = $dbh->prepare($query_select);
 	my $rv = $sth->execute();
 	if (!defined $rv) {
-	  print "Error in request: " . $dbh->errstr . "\n";
-	  exit(0);
+		import_excel_error($dbh->errstr, $query_select);
+	    exit(0);
 	}
 
 	my $order_id = 0;
@@ -695,7 +709,7 @@ sub import_excel_get_or_create_location_id {
 	my $sth = $dbh->prepare($query_select);
 	my $rv = $sth->execute();
 	if (!defined $rv) {
-	  	print "Error in request: " . $dbh->errstr . "\n";
+		import_excel_error($dbh->errstr, $query_select);
 	  	exit(0);
 	}
 
@@ -711,14 +725,14 @@ sub import_excel_get_or_create_location_id {
    		                         VALUES ('$location','$account')";
 		$rv = $dbh->do($query_insert);
 		if (!defined $rv) {
-		  	print "Error in request: " . $dbh->errstr . "\n";
+			import_excel_error($dbh->errstr, $query_insert);
 		  	exit(0);
 		}
 
 		$sth = $dbh->prepare($query_select);
 		$rv = $sth->execute();
 		if (!defined $rv) {
-		  	print "Error in request: " . $dbh->errstr . "\n";
+			import_excel_error($dbh->errstr, $query_select);
 		  	exit(0);
 		}
 
