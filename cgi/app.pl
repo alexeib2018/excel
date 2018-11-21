@@ -864,9 +864,10 @@ sub process_request {
 		$self->render(text => '{"account":"'.$account.'","name":'.$name.',"client_ip":"'.$ENV{'REMOTE_ADDR'}.'"}', format => 'json');
 	} elsif ($action eq '/api/get_data') {
 		my $items = select_json( ['id','description'], "SELECT items.item_no, description
-		                                                  FROM items
-		                                                  JOIN prices ON items.item_no=prices.item_no
-		                                                           WHERE prices.account='$account'");
+		                                                  FROM items" );
+
+		                                                  #JOIN prices ON items.item_no=prices.item_no
+		                                                  #         WHERE prices.account='$account'");
 		my $locations = select_json( ['id','location'], "SELECT id, location
 		                                                   FROM locations
 		                                                  WHERE account='$account'");
